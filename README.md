@@ -1,6 +1,7 @@
 # efenow's NTFY.sh Message Sender
 
 [![Run on Replit](https://replit.com/badge/github/efenow/ntfy.sh-sender)](https://replit.com/github/efenow/ntfy.sh-sender)
+[![Remix on Glitch](https://cdn.glitch.com/2703baf2-b643-4da7-ab91-7ee2a2d00b5b%2Fremix-button.svg)](https://glitch.com/edit/#!/import/github/efenow/ntfy.sh-sender)
 
 This Python application sends messages to [ntfy.sh](https://ntfy.sh) in a configurable loop. It's perfect for setting up periodic notifications or alerts.
 
