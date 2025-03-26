@@ -30,7 +30,7 @@ def parse_arguments():
         help="Comma-separated list of tags (e.g., 'warning,skull')."
     )
     parser.add_argument(
-        "--topic", type=str, default="efenow_alerts",
+        "--topic", type=str, default="my_test",
         help="The ntfy.sh topic to send to."
     )
     parser.add_argument(

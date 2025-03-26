@@ -209,8 +209,8 @@ def parse_arguments():
     
     parser.add_argument(
         "--topic",
-        default="efenow_alerts",
-        help="The ntfy.sh topic to send to. Default is 'efenow_alerts'."
+        default="my_test",
+        help="The ntfy.sh topic to send to. Default is 'my_test'."
     )
     
     parser.add_argument(

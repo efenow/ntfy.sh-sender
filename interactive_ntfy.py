@@ -49,7 +49,7 @@ def main():
     # Get user inputs
     title = get_user_input("Enter notification title", "Alert")
     message = get_user_input("Enter message body", "Notification from Replit")
-    topic = get_user_input("Enter topic (without ntfy.sh/)", "efenow_alerts")
+    topic = get_user_input("Enter topic (without ntfy.sh/)", "my_test")
     
     # Display configuration
     print("\n--- Configuration ---")
