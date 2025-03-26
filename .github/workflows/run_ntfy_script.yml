@@ -1,0 +1,52 @@
+name: Run NTFY Script
+
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'Message to send'
+        required: true
+        default: 'Message from GitHub Action'
+      title:
+        description: 'Notification title'
+        required: false
+        default: 'GitHub Action Alert'
+      tags:
+        description: 'Comma-separated tags (e.g., warning,test)'
+        required: false
+        default: 'github,robot'
+      priority:
+        description: 'Priority level (1-5)'
+        required: false
+        default: '3'
+      iterations:
+        description: 'Number of messages to send'
+        required: false
+        default: '1'
+      interval:
+        description: 'Seconds between messages'
+        required: false
+        default: '60'
+
+jobs:
+  send-notification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Run NTFY Script
+        run: |
+          python ntfy_loop.py \
+            --message "${{ github.event.inputs.message }}" \
+            --title "${{ github.event.inputs.title }}" \
+            --tags "${{ github.event.inputs.tags }}" \
+            --priority "${{ github.event.inputs.priority }}" \
+            --iterations "${{ github.event.inputs.iterations }}" \
+            --interval "${{ github.event.inputs.interval }}" \
+            --verbose

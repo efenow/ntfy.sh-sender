@@ -1,0 +1,4 @@
+{
+  "name": "Run NTFY Script",
+  "command": "python run_ntfy.py --iterations 1"
+}

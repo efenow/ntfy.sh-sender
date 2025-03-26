@@ -1,0 +1,14 @@
+# This is a reference file to help you modify the Replit configuration
+# Copy and paste these instructions to set up a workflow for the run button
+
+# 1. Go to the Replit interface and click on "Tools" in the sidebar
+# 2. Click on "Workflows"
+# 3. Click "Create a workflow"
+# 4. Name it "Run NTFY Script"
+# 5. Use the following configuration:
+
+# Shell command to run:
+python run_ntfy.py
+
+# This will make the run button execute our custom script with the
+# pre-configured settings instead of trying to start a web server.
