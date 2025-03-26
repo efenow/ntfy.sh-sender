@@ -7,7 +7,7 @@ This Python application sends messages to [ntfy.sh](https://ntfy.sh) in a config
 
 ## Quick Start with Replit
 
-### Option 1: Web Interface (Easiest)
+### Option 1: Web Interface (Easiest and Recommended)
 Just click the Run button and open the webview to access the user-friendly web interface:
 
 This will:
