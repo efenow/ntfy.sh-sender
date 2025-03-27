@@ -80,6 +80,64 @@ HTML_TEMPLATE = """
         .table thead th {
             color: #adb5bd;
         }
+        
+        /* Forever switch animation styles */
+        .infinite-container {
+            position: relative;
+        }
+        
+        .infinite-input {
+            width: 100%;
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        .infinite-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #495057;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.375rem;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.3s ease-in-out;
+            pointer-events: none;
+            border: 1px solid #495057;
+            overflow: hidden;
+        }
+        
+        .infinite-overlay.active {
+            opacity: 1;
+            transform: scale(1);
+            z-index: 1;
+        }
+        
+        .infinite-symbol {
+            font-size: 2rem;
+            color: #adb5bd;
+            font-weight: bold;
+            display: inline-block;
+            animation: pulse 2s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+        }
     </style>
     <script>
         // Store active NTFY loops
@@ -267,14 +325,34 @@ HTML_TEMPLATE = """
             // Set up the infinite loop checkbox to disable/enable iterations input
             const infiniteCheckbox = document.getElementById('infinite-loop');
             const iterationsInput = document.getElementById('loop-iterations');
+            const infiniteOverlay = document.getElementById('infinite-overlay');
+            const infiniteInputContainer = document.querySelector('.infinite-input');
             
-            if (infiniteCheckbox && iterationsInput) {
+            if (infiniteCheckbox && iterationsInput && infiniteOverlay) {
                 infiniteCheckbox.addEventListener('change', function() {
                     iterationsInput.disabled = this.checked;
+                    
+                    // Handle the animation
                     if (this.checked) {
+                        // When checked, show the infinity animation
                         iterationsInput.value = '';
+                        
+                        // Fade out the input slightly
+                        infiniteInputContainer.style.opacity = '0.4';
+                        
+                        // Show the overlay with animation
+                        setTimeout(() => {
+                            infiniteOverlay.classList.add('active');
+                        }, 100);
                     } else {
+                        // When unchecked, hide the infinity animation
                         iterationsInput.value = '5';
+                        
+                        // Restore input opacity
+                        infiniteInputContainer.style.opacity = '1';
+                        
+                        // Hide the overlay with animation
+                        infiniteOverlay.classList.remove('active');
                     }
                 });
             }
@@ -365,13 +443,20 @@ HTML_TEMPLATE = """
                         </div>
                         <div class="col-md-4">
                             <label for="loop-iterations" class="form-label">Number of Messages</label>
-                            <div class="input-group">
-                                <input type="number" class="form-control" id="loop-iterations" name="iterations_value" value="5" min="1">
-                                <div class="input-group-text">
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="infinite-loop" name="infinite_loop">
-                                        <label class="form-check-label" for="infinite-loop">Forever</label>
+                            <div class="infinite-container">
+                                <!-- Normal input for iterations count -->
+                                <div class="input-group infinite-input">
+                                    <input type="number" class="form-control" id="loop-iterations" name="iterations_value" value="5" min="1">
+                                    <div class="input-group-text">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="infinite-loop" name="infinite_loop">
+                                            <label class="form-check-label" for="infinite-loop">Forever</label>
+                                        </div>
                                     </div>
+                                </div>
+                                <!-- Overlay that appears when "Forever" is enabled -->
+                                <div class="infinite-overlay" id="infinite-overlay">
+                                    <div class="infinite-symbol">∞</div>
                                 </div>
                             </div>
                         </div>
