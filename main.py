@@ -70,6 +70,16 @@ HTML_TEMPLATE = """
             background-position: right 0.75rem center;
             background-size: 16px 12px;
         }
+        
+        /* Make table text color consistent with other text */
+        .table {
+            color: #dee2e6;
+        }
+        
+        /* Make sure table header has consistent color */
+        .table thead th {
+            color: #adb5bd;
+        }
     </style>
     <script>
         // Store active NTFY loops
