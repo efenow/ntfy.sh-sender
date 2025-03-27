@@ -103,6 +103,54 @@ HTML_TEMPLATE = """
                 </div>
             </div>
             
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Interactive NTFY Loop</h4>
+                </div>
+                <div class="card-body">
+                    <p>Set up a repeated notification loop with custom parameters:</p>
+                    <form action="/run-ntfy-loop" method="post" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="loop-topic" class="form-label">Topic</label>
+                            <input type="text" class="form-control" id="loop-topic" name="topic" value="my_test" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="loop-title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="loop-title" name="title" value="Loop Alert" required>
+                        </div>
+                        <div class="col-12">
+                            <label for="loop-message" class="form-label">Message</label>
+                            <input type="text" class="form-control" id="loop-message" name="message" value="Periodic notification from Replit" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="loop-tags" class="form-label">Tags (comma-separated)</label>
+                            <input type="text" class="form-control" id="loop-tags" name="tags" value="repeat,clock">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="loop-priority" class="form-label">Priority (1-5)</label>
+                            <select class="form-select" id="loop-priority" name="priority">
+                                <option value="1">1 - Min</option>
+                                <option value="2">2 - Low</option>
+                                <option value="3" selected>3 - Default</option>
+                                <option value="4">4 - High</option>
+                                <option value="5">5 - Max</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="loop-interval" class="form-label">Interval (seconds)</label>
+                            <input type="number" class="form-control" id="loop-interval" name="interval" value="30" min="5" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="loop-iterations" class="form-label">Number of Messages</label>
+                            <input type="number" class="form-control" id="loop-iterations" name="iterations" value="5" min="1" max="20" required>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <button type="submit" class="btn btn-primary">Start NTFY Loop</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
             <div class="card">
                 <div class="card-header">
                     <h4>Documentation</h4>
@@ -479,6 +527,145 @@ def run_ntfy_test():
         return output_html
     except Exception as e:
         return f"Error running NTFY test: {str(e)}", 500
+
+@app.route('/run-ntfy-loop', methods=['POST'])
+def run_ntfy_loop():
+    """Process the notification loop form and send recurring notifications"""
+    
+    try:
+        # Get form data
+        title = request.form.get('title', 'Loop Alert')
+        message = request.form.get('message', 'Periodic notification from Replit')
+        topic = request.form.get('topic', 'my_test')
+        tags = request.form.get('tags', 'repeat,clock')
+        priority = request.form.get('priority', '3')
+        interval = request.form.get('interval', '30')
+        iterations = request.form.get('iterations', '5')
+        
+        # Build command with proper arguments
+        cmd = [
+            sys.executable, 
+            "ntfy_loop.py", 
+            "--topic", topic,
+            "--message", message,
+            "--title", title,
+            "--interval", interval,
+            "--iterations", iterations
+        ]
+        
+        if tags:
+            cmd.extend(["--tags", tags])
+        
+        if priority:
+            cmd.extend(["--priority", priority])
+            
+        # Execute the command
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        
+        # Return success page with output
+        success_html = f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>NTFY Loop Complete</title>
+            <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+            <style>
+                body {{
+                    padding-top: 2rem;
+                    min-height: 100vh;
+                    display: flex;
+                    flex-direction: column;
+                }}
+                .main-content {{
+                    flex: 1;
+                }}
+                .terminal {{
+                    background-color: #1e1e1e;
+                    color: #0f0;
+                    font-family: monospace;
+                    padding: 15px;
+                    border-radius: 6px;
+                    margin: 20px 0;
+                    white-space: pre-wrap;
+                    max-height: 400px;
+                    overflow-y: auto;
+                }}
+                .notification-info {{
+                    background-color: #2d3338;
+                    border-radius: 6px;
+                    padding: 15px;
+                    margin-bottom: 20px;
+                }}
+            </style>
+        </head>
+        <body data-bs-theme="dark">
+            <div class="container main-content">
+                <div class="alert alert-success mt-4" role="alert">
+                    <h4 class="alert-heading">NTFY Loop Complete!</h4>
+                    <p>Your notification loop to ntfy.sh/{topic} has finished.</p>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Loop Configuration</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><strong>Topic:</strong> ntfy.sh/{topic}</li>
+                            <li class="list-group-item"><strong>Title:</strong> {title}</li>
+                            <li class="list-group-item"><strong>Message:</strong> {message}</li>
+                            <li class="list-group-item"><strong>Tags:</strong> {tags}</li>
+                            <li class="list-group-item"><strong>Priority:</strong> {priority}</li>
+                            <li class="list-group-item"><strong>Interval:</strong> {interval} seconds</li>
+                            <li class="list-group-item"><strong>Total Messages:</strong> {iterations}</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <h5 class="mt-4">Command Output:</h5>
+                <div class="terminal">
+{result.stdout}
+                </div>
+                
+                <div class="mt-4">
+                    <a href="/" class="btn btn-primary">Back to Home</a>
+                </div>
+            </div>
+            
+            <footer class="mt-5">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>About efenow's NTFY.sh Sender</h5>
+                            <p>efenow's NTFY.sh Sender is a customized tool that lets you send notifications to your phone or desktop using the NTFY.sh service.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Related Links</h5>
+                            <ul class="list-unstyled">
+                                <li><a href="https://ntfy.sh" class="text-decoration-none">NTFY.sh Website</a></li>
+                                <li><a href="https://docs.ntfy.sh" class="text-decoration-none">NTFY.sh Documentation</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </body>
+        </html>
+        """
+        return success_html
+        
+    except subprocess.CalledProcessError as e:
+        error_message = f"Command failed with return code {e.returncode}\n\nStdout:\n{e.stdout}\n\nStderr:\n{e.stderr}"
+        return f"Error: {error_message}", 500
+    except Exception as e:
+        return f"Error: {str(e)}", 500
 
 @app.route('/run-curl-loop')
 def run_curl_loop():
