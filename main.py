@@ -108,12 +108,14 @@ HTML_TEMPLATE = """
             pointer-events: none;
             border: 1px solid #495057;
             overflow: hidden;
+            cursor: pointer;
         }
         
         .infinite-overlay.active {
             opacity: 1;
             transform: scale(1);
             z-index: 1;
+            pointer-events: auto; /* Make it clickable when active */
         }
         
         .infinite-symbol {
@@ -329,11 +331,12 @@ HTML_TEMPLATE = """
             const infiniteInputContainer = document.querySelector('.infinite-input');
             
             if (infiniteCheckbox && iterationsInput && infiniteOverlay) {
-                infiniteCheckbox.addEventListener('change', function() {
-                    iterationsInput.disabled = this.checked;
+                // Function to update the UI based on checkbox state
+                function updateInfiniteUI(checked) {
+                    iterationsInput.disabled = checked;
                     
                     // Handle the animation
-                    if (this.checked) {
+                    if (checked) {
                         // When checked, show the infinity animation
                         iterationsInput.value = '';
                         
@@ -354,6 +357,20 @@ HTML_TEMPLATE = """
                         // Hide the overlay with animation
                         infiniteOverlay.classList.remove('active');
                     }
+                }
+                
+                // Event listener for checkbox changes
+                infiniteCheckbox.addEventListener('change', function() {
+                    updateInfiniteUI(this.checked);
+                });
+                
+                // Event listener for clicking on the infinity overlay
+                infiniteOverlay.addEventListener('click', function() {
+                    // Uncheck the checkbox
+                    infiniteCheckbox.checked = false;
+                    
+                    // Update the UI
+                    updateInfiniteUI(false);
                 });
             }
         });
