@@ -64,6 +64,205 @@ HTML_TEMPLATE = """
             background-color: #212529;
         }
     </style>
+    <script>
+        // Store active NTFY loops
+        let ntfyTasks = [];
+        let nextTaskId = 1;
+        
+        // Function to update the task table
+        function updateTaskTable() {
+            const tableBody = document.getElementById('ntfy-tasks-body');
+            const emptyRow = document.querySelector('.empty-row');
+            
+            // Show/hide empty row message
+            if (ntfyTasks.length === 0) {
+                emptyRow.style.display = 'table-row';
+                return;
+            } else {
+                emptyRow.style.display = 'none';
+            }
+            
+            // Clear existing rows except the empty row
+            const rows = tableBody.querySelectorAll('tr:not(.empty-row)');
+            rows.forEach(row => row.remove());
+            
+            // Add task rows
+            ntfyTasks.forEach(task => {
+                const row = document.createElement('tr');
+                row.dataset.taskId = task.id;
+                
+                // Title
+                const titleCell = document.createElement('td');
+                titleCell.textContent = task.title;
+                row.appendChild(titleCell);
+                
+                // Topic
+                const topicCell = document.createElement('td');
+                topicCell.textContent = task.topic;
+                row.appendChild(topicCell);
+                
+                // Priority
+                const priorityCell = document.createElement('td');
+                priorityCell.textContent = task.priority;
+                row.appendChild(priorityCell);
+                
+                // Interval
+                const intervalCell = document.createElement('td');
+                intervalCell.textContent = task.intervalDisplay;
+                row.appendChild(intervalCell);
+                
+                // Time left
+                const timeLeftCell = document.createElement('td');
+                timeLeftCell.textContent = task.isInfinite ? '∞' : calculateTimeLeft(task);
+                timeLeftCell.classList.add('time-left');
+                row.appendChild(timeLeftCell);
+                
+                // Actions
+                const actionsCell = document.createElement('td');
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn btn-sm btn-danger';
+                deleteBtn.textContent = 'Stop';
+                deleteBtn.onclick = function() { deleteTask(task.id); };
+                actionsCell.appendChild(deleteBtn);
+                row.appendChild(actionsCell);
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Function to calculate time left display
+        function calculateTimeLeft(task) {
+            if (!task.nextRunTime) return 'Pending';
+            
+            const now = new Date();
+            const diff = Math.max(0, Math.floor((task.nextRunTime - now) / 1000));
+            
+            if (diff === 0) return 'Now';
+            
+            const minutes = Math.floor(diff / 60);
+            const seconds = diff % 60;
+            
+            if (minutes > 0) {
+                return `${minutes}m ${seconds}s`;
+            } else {
+                return `${seconds}s`;
+            }
+        }
+        
+        // Function to delete a task
+        function deleteTask(taskId) {
+            const index = ntfyTasks.findIndex(task => task.id === taskId);
+            if (index !== -1) {
+                // Cancel the interval timer
+                clearInterval(ntfyTasks[index].timer);
+                // Remove from array
+                ntfyTasks.splice(index, 1);
+                // Update the table
+                updateTaskTable();
+            }
+        }
+        
+        // Function to update time left for all tasks
+        function updateTimers() {
+            const timeLeftCells = document.querySelectorAll('.time-left');
+            ntfyTasks.forEach((task, index) => {
+                if (!task.isInfinite && timeLeftCells[index]) {
+                    timeLeftCells[index].textContent = calculateTimeLeft(task);
+                }
+            });
+        }
+        
+        // Update timers every second
+        setInterval(updateTimers, 1000);
+        
+        // Function to add a task (will be called from the form submission)
+        function addNtfyTask(taskData) {
+            const task = {
+                id: nextTaskId++,
+                title: taskData.title,
+                topic: taskData.topic,
+                message: taskData.message,
+                tags: taskData.tags,
+                priority: taskData.priority,
+                intervalValue: taskData.intervalValue,
+                intervalUnit: taskData.intervalUnit,
+                intervalDisplay: `${taskData.intervalValue} ${taskData.intervalUnit}`,
+                isInfinite: taskData.isInfinite,
+                iterations: taskData.iterations,
+                nextRunTime: new Date(Date.now() + convertToMilliseconds(taskData.intervalValue, taskData.intervalUnit)),
+                timer: null
+            };
+            
+            // Set up the interval timer
+            task.timer = setInterval(() => {
+                // Here would be the actual code to send the notification
+                // For now, we'll just update the next run time
+                task.nextRunTime = new Date(Date.now() + convertToMilliseconds(task.intervalValue, task.intervalUnit));
+                updateTaskTable();
+            }, convertToMilliseconds(task.intervalValue, task.intervalUnit));
+            
+            // Add to tasks array
+            ntfyTasks.push(task);
+            
+            // Update the table
+            updateTaskTable();
+        }
+        
+        // Convert interval to milliseconds based on unit
+        function convertToMilliseconds(value, unit) {
+            switch (unit) {
+                case 'hours': return value * 60 * 60 * 1000;
+                case 'minutes': return value * 60 * 1000;
+                case 'seconds': return value * 1000;
+                default: return value * 1000; // Default to seconds
+            }
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up form submission to add a task
+            const form = document.querySelector('form[action="/run-ntfy-loop"]');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(form);
+                    const taskData = {
+                        title: formData.get('title'),
+                        topic: formData.get('topic'),
+                        message: formData.get('message'),
+                        tags: formData.get('tags'),
+                        priority: formData.get('priority'),
+                        intervalValue: parseInt(formData.get('interval_value')),
+                        intervalUnit: formData.get('interval_unit'),
+                        isInfinite: formData.get('infinite_loop') === 'on',
+                        iterations: formData.get('iterations_value')
+                    };
+                    
+                    // Add the task
+                    addNtfyTask(taskData);
+                    
+                    // Optional: Reset form or show confirmation
+                    alert('NTFY loop created successfully!');
+                });
+            }
+            
+            // Set up the infinite loop checkbox to disable/enable iterations input
+            const infiniteCheckbox = document.getElementById('infinite-loop');
+            const iterationsInput = document.getElementById('loop-iterations');
+            
+            if (infiniteCheckbox && iterationsInput) {
+                infiniteCheckbox.addEventListener('change', function() {
+                    iterationsInput.disabled = this.checked;
+                    if (this.checked) {
+                        iterationsInput.value = '';
+                    } else {
+                        iterationsInput.value = '5';
+                    }
+                });
+            }
+        });
+    </script>
 </head>
 <body data-bs-theme="dark">
     <div class="container main-content">
@@ -137,17 +336,60 @@ HTML_TEMPLATE = """
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label for="loop-interval" class="form-label">Interval (seconds)</label>
-                            <input type="number" class="form-control" id="loop-interval" name="interval" value="30" min="5" required>
+                            <label for="loop-interval" class="form-label">Interval</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="loop-interval" name="interval_value" value="30" min="1" required>
+                                <select class="form-select" id="loop-interval-unit" name="interval_unit">
+                                    <option value="seconds" selected>Seconds</option>
+                                    <option value="minutes">Minutes</option>
+                                    <option value="hours">Hours</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="col-md-4">
                             <label for="loop-iterations" class="form-label">Number of Messages</label>
-                            <input type="number" class="form-control" id="loop-iterations" name="iterations" value="5" min="1" max="20" required>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="loop-iterations" name="iterations_value" value="5" min="1">
+                                <div class="input-group-text">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="infinite-loop" name="infinite_loop">
+                                        <label class="form-check-label" for="infinite-loop">Forever</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-12 mt-3">
                             <button type="submit" class="btn btn-primary">Start NTFY Loop</button>
                         </div>
                     </form>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>NTFY Loop Tasks</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="ntfy-tasks-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Topic</th>
+                                    <th>Priority</th>
+                                    <th>Interval</th>
+                                    <th>Time Left</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ntfy-tasks-body">
+                                <!-- Tasks will be dynamically added here via JavaScript -->
+                                <tr class="empty-row">
+                                    <td colspan="6" class="text-center">No active NTFY loops</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
             
@@ -539,8 +781,21 @@ def run_ntfy_loop():
         topic = request.form.get('topic', 'my_test')
         tags = request.form.get('tags', 'repeat,clock')
         priority = request.form.get('priority', '3')
-        interval = request.form.get('interval', '30')
-        iterations = request.form.get('iterations', '5')
+        
+        # Handle interval value and unit
+        interval_value = request.form.get('interval_value', '30')
+        interval_unit = request.form.get('interval_unit', 'seconds')
+        
+        # Convert interval to seconds based on the unit
+        interval_in_seconds = str(int(interval_value))
+        if interval_unit == 'minutes':
+            interval_in_seconds = str(int(interval_value) * 60)
+        elif interval_unit == 'hours':
+            interval_in_seconds = str(int(interval_value) * 3600)
+        
+        # Handle infinite loop option
+        infinite_loop = request.form.get('infinite_loop') == 'on'
+        iterations = '999999' if infinite_loop else request.form.get('iterations_value', '5')
         
         # Build command with proper arguments
         cmd = [
@@ -549,7 +804,7 @@ def run_ntfy_loop():
             "--topic", topic,
             "--message", message,
             "--title", title,
-            "--interval", interval,
+            "--interval", interval_in_seconds,
             "--iterations", iterations
         ]
         
@@ -623,8 +878,8 @@ def run_ntfy_loop():
                             <li class="list-group-item"><strong>Message:</strong> {message}</li>
                             <li class="list-group-item"><strong>Tags:</strong> {tags}</li>
                             <li class="list-group-item"><strong>Priority:</strong> {priority}</li>
-                            <li class="list-group-item"><strong>Interval:</strong> {interval} seconds</li>
-                            <li class="list-group-item"><strong>Total Messages:</strong> {iterations}</li>
+                            <li class="list-group-item"><strong>Interval:</strong> {interval_value} {interval_unit} ({interval_in_seconds} seconds)</li>
+                            <li class="list-group-item"><strong>Total Messages:</strong> {iterations if not infinite_loop else "∞ (Forever)"}</li>
                         </ul>
                     </div>
                 </div>
