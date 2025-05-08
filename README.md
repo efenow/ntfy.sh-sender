@@ -1,4 +1,4 @@
-# efenow's NTFY.sh Message Sender
+# 📎 efenow's NTFY.sh Message Sender
 
 [![Run on Replit](https://replit.com/badge/github/efenow/ntfy.sh-sender)](https://replit.com/github/efenow/ntfy.sh-sender)
 [![Remix on Glitch](https://cdn.glitch.com/2703baf2-b643-4da7-ab91-7ee2a2d00b5b%2Fremix-button.svg)](https://glitch.com/edit/#!/import/github/efenow/ntfy.sh-sender)
@@ -6,9 +6,9 @@
 
 This Python application sends messages to [ntfy.sh](https://ntfy.sh) in a configurable loop. It's perfect for setting up periodic notifications or alerts.
 
-## Quick Start with Replit
+## 💨 Quick Start with Replit
 
-### Option 1: Web Interface (Easiest and Recommended)
+### 🖥️ Option 1: Web Interface (Easiest and Recommended)
 Just click the Run button and open the webview to access the user-friendly web interface:
 
 This will:
@@ -17,13 +17,13 @@ This will:
 - Allow you to run pre-configured demo scripts
 - Display real-time results and notification status
 
-#### Web Interface Features
+#### ✨ Web Interface Features
 - **Interactive Form Mode**: Fill out a simple form with title, message, topic, tags, and priority
 - **Pre-configured Demo**: Quickly test notifications with a customizable topic
 - **Easy Navigation**: Simple, responsive design with Bootstrap styling
 - **Real-time Results**: See instant feedback when notifications are sent
 
-### Option 2: Interactive Mode (Recommended)
+### 📟 Option 2: Interactive Mode (Recommended)
 Type in the terminal or click the "Run Interactive Script" button in the web interface:
 ```bash
 python interactive_ntfy.py
@@ -35,7 +35,7 @@ This will:
 - Ask for the topic name (without the ntfy.sh/ prefix)
 - Send a single notification after confirmation
 
-### Option 3: Run from Shell with Pre-configured Settings
+### 👾 Option 3: Run from Shell with Pre-configured Settings
 Open the Shell and type:
 ```bash
 python run_ntfy.py
@@ -48,7 +48,7 @@ This will:
 
 To customize these default settings, edit the variables in the `run_ntfy.py` file or use command-line arguments.
 
-### Option 4: Create a Custom Workflow
+### 🔀 Option 4: Create a Custom Workflow
 1. Click on **Tools** in the sidebar
 2. Select **Workflows** 
 3. Click **Create workflow**
@@ -57,7 +57,7 @@ To customize these default settings, edit the variables in the `run_ntfy.py` fil
 6. Save the workflow
 7. Now you can run it from the workflows panel or set it as the default run button action
 
-### Option 5: Run with Custom Parameters
+### 🤖 Option 5: Run with Custom Parameters
 ```bash
 python ntfy_loop.py --message "Your message" --title "Your Title" --interval 30 --iterations 10
 ```
@@ -67,7 +67,7 @@ Or use the interactive mode with custom parameters:
 python interactive_ntfy.py --tags "warning,skull" --priority 5
 ```
 
-## Features
+## ✨ Features
 
 - Send messages to any ntfy.sh topic (defaults to `my_test`)
 - User-friendly web interface with form-based notification sending
@@ -77,12 +77,12 @@ python interactive_ntfy.py --tags "warning,skull" --priority 5
 - Graceful termination with Ctrl+C
 - Detailed logging and statistics
 
-## Requirements
+## ⚙️ Requirements
 
 - Python 3.6+
 - curl installed on your system
 
-## Usage
+## 🛠️ Usage
 
 ### Basic Usage
 
@@ -92,7 +92,7 @@ Send a basic message to the default topic (`my_test`):
 python ntfy_loop.py --message "System is running normally"
 ```
 
-### Customized Usage
+### 📈 Customized Usage
 
 Specify a different topic and add a title:
 
@@ -112,7 +112,7 @@ Set a custom interval (60 seconds) and limit the number of messages:
 python ntfy_loop.py --message "Hourly check-in" --interval 60 --iterations 24
 ```
 
-### All Available Options
+### 📦 All Available Options
 
 ```
 usage: ntfy_loop.py [-h] [--topic TOPIC] --message MESSAGE [--title TITLE] [--tags TAGS]
@@ -139,7 +139,7 @@ options:
                         Set the logging level. (default: INFO)
 ```
 
-## Examples
+## 💡 Examples
 
 ### Send a critical alert every 5 minutes for an hour
 
@@ -159,10 +159,10 @@ python ntfy_loop.py --message "Meeting starts in 30 minutes" --title "Meeting Re
 python ntfy_loop.py --message "Heartbeat check" --title "System Monitor" --interval 3600 --verbose
 ```
 
-## Ntfy.sh Documentation
+## 🗂️ Ntfy.sh Documentation
 
 For more information about ntfy.sh features and capabilities, visit [ntfy.sh documentation](https://docs.ntfy.sh/).
 
-## License
+## 🎓 License
 
-This script is provided as-is under the MIT License.
+[ntfy.sh-sender](https://github.com/efenow/ntfy.sh-sender/) © 2025 by [efenow](https://efenow.xyz) is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) 
